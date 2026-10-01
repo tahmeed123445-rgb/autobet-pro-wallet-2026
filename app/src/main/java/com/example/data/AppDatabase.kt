@@ -52,9 +52,6 @@ abstract class AppDatabase : RoomDatabase() {
                             CoroutineScope(Dispatchers.IO).launch {
                                 INSTANCE?.let { dbInstance ->
                                     val qDao = dbInstance.quickOptionDao()
-                                    qDao.insertQuickOption(QuickOptionEntity(name = "BetProExch", url = "https://betproexch.com", isEnabled = true, displayOrder = 1))
-                                    qDao.insertQuickOption(QuickOptionEntity(name = "BPExch", url = "https://bpexch.com", isEnabled = true, displayOrder = 2))
-                                    qDao.insertQuickOption(QuickOptionEntity(name = "BPExch Live", url = "https://bpexchlive.com", isEnabled = true, displayOrder = 3))
 
                                     val pDao = dbInstance.paymentMethodDao()
                                     pDao.insertPaymentMethod(PaymentMethodEntity(name = "Easypaisa", accountNumber = "03001234567", accountTitle = "AutoBet Official", instructions = "Send funds via Easypaisa and upload screenshot", isEnabled = true, displayOrder = 1))

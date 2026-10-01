@@ -154,10 +154,10 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun approveUser(userRowId: Long, bpUsername: String, bpPassword: String, userId: String) {
+    fun approveUser(userRowId: Long, bpLink: String, bpUsername: String, bpPassword: String, userId: String) {
         viewModelScope.launch {
             try {
-                repository?.updateUserApproval(userRowId, "APPROVED", bpUsername, bpPassword, userId)
+                repository?.updateUserApproval(userRowId, "APPROVED", bpLink, bpUsername, bpPassword, userId)
                 val updated = repository?.getUserById(userId)
                 if (updated != null && _currentUser.value?.id == userRowId) {
                     _currentUser.value = updated

@@ -383,6 +383,7 @@ fun PendingUsersSection(users: List<com.example.data.UserEntity>, viewModel: Wal
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
             items(pendingUsers) { user ->
+                var bpLink by remember { mutableStateOf("https://betproexch.com") }
                 var bpUser by remember { mutableStateOf("") }
                 var bpPass by remember { mutableStateOf("") }
 
@@ -400,9 +401,21 @@ fun PendingUsersSection(users: List<com.example.data.UserEntity>, viewModel: Wal
                         Text(text = "Mobile: ${user.mobileNumber}", color = Color.White.copy(alpha = 0.9f))
 
                         OutlinedTextField(
+                            value = bpLink,
+                            onValueChange = { bpLink = it },
+                            label = { Text("BetPro Link", color = Color.Gray) },
+                            placeholder = { Text("Enter BetPro Website Link", color = Color.Gray) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = goldBorder, unfocusedBorderColor = goldBorder.copy(alpha = 0.4f), focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                        )
+
+                        OutlinedTextField(
                             value = bpUser,
                             onValueChange = { bpUser = it },
-                            placeholder = { Text("BetPro Username", color = Color.Gray) },
+                            label = { Text("BetPro Username", color = Color.Gray) },
+                            placeholder = { Text("Enter BetPro Username", color = Color.Gray) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(8.dp),
                             singleLine = true,
@@ -412,7 +425,8 @@ fun PendingUsersSection(users: List<com.example.data.UserEntity>, viewModel: Wal
                         OutlinedTextField(
                             value = bpPass,
                             onValueChange = { bpPass = it },
-                            placeholder = { Text("BetPro Password", color = Color.Gray) },
+                            label = { Text("BetPro Password", color = Color.Gray) },
+                            placeholder = { Text("Enter BetPro Password", color = Color.Gray) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(8.dp),
                             singleLine = true,
@@ -421,12 +435,12 @@ fun PendingUsersSection(users: List<com.example.data.UserEntity>, viewModel: Wal
 
                         Button(
                             onClick = {
-                                if (bpUser.isBlank() || bpPass.isBlank()) {
-                                    Toast.makeText(context, "Enter credentials", Toast.LENGTH_SHORT).show()
+                                if (bpLink.isBlank() || bpUser.isBlank() || bpPass.isBlank()) {
+                                    Toast.makeText(context, "Enter Link, Username and Password", Toast.LENGTH_SHORT).show()
                                     return@Button
                                 }
-                                viewModel.approveUser(user.id, bpUser, bpPass, user.userId)
-                                Toast.makeText(context, "User approved!", Toast.LENGTH_SHORT).show()
+                                viewModel.approveUser(user.id, bpLink, bpUser, bpPass, user.userId)
+                                Toast.makeText(context, "User approved & BetPro assigned!", Toast.LENGTH_SHORT).show()
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981)),
@@ -463,6 +477,7 @@ fun ApprovedUsersSection(users: List<com.example.data.UserEntity>, cardDarkBg: C
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(text = user.fullName, color = goldBorder, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         Text(text = "Username: ${user.username}", color = Color.White)
+                        Text(text = "BetPro Link: ${user.betProLink.ifEmpty { "N/A" }}", color = Color(0xFF34D399))
                         Text(text = "BetPro Username: ${user.betProUsername}", color = Color(0xFF34D399), fontWeight = FontWeight.Bold)
                         Text(text = "BetPro Password: ${user.betProPassword}", color = Color(0xFF34D399), fontWeight = FontWeight.Bold)
                     }
@@ -503,7 +518,78 @@ fun RejectedUsersSection(users: List<com.example.data.UserEntity>, cardDarkBg: C
 
 @Composable
 fun BetProManagementSection(users: List<com.example.data.UserEntity>, viewModel: WalletViewModel, cardDarkBg: Color, goldBorder: Color) {
-    ApprovedUsersSection(users, cardDarkBg, goldBorder)
+    val approvedUsers = users.filter { it.status == "APPROVED" }
+    val context = LocalContext.current
+
+    if (approvedUsers.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("No approved users for BetPro management", color = Color.Gray)
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(vertical = 16.dp)
+        ) {
+            items(approvedUsers) { user ->
+                var linkText by remember { mutableStateOf(user.betProLink.ifEmpty { "https://betproexch.com" }) }
+                var userText by remember { mutableStateOf(user.betProUsername) }
+                var passText by remember { mutableStateOf(user.betProPassword) }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth().border(1.dp, goldBorder, RoundedCornerShape(14.dp)),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = cardDarkBg)
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(text = "Edit User: ${user.fullName} (${user.username})", color = goldBorder, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+                        OutlinedTextField(
+                            value = linkText,
+                            onValueChange = { linkText = it },
+                            label = { Text("BetPro Link", color = Color.Gray) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = goldBorder, unfocusedBorderColor = goldBorder.copy(alpha = 0.4f), focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                        )
+
+                        OutlinedTextField(
+                            value = userText,
+                            onValueChange = { userText = it },
+                            label = { Text("BetPro Username", color = Color.Gray) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = goldBorder, unfocusedBorderColor = goldBorder.copy(alpha = 0.4f), focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                        )
+
+                        OutlinedTextField(
+                            value = passText,
+                            onValueChange = { passText = it },
+                            label = { Text("BetPro Password", color = Color.Gray) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = goldBorder, unfocusedBorderColor = goldBorder.copy(alpha = 0.4f), focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                        )
+
+                        Button(
+                            onClick = {
+                                viewModel.approveUser(user.id, linkText, userText, passText, user.userId)
+                                Toast.makeText(context, "BetPro Account updated successfully!", Toast.LENGTH_SHORT).show()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = goldBorder),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Update BetPro Account", color = Color.Black, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable

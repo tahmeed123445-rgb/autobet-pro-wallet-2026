@@ -12,6 +12,7 @@ data class UserEntity(
     val mobileNumber: String,
     val password: String,
     val status: String = "PENDING_APPROVAL", // PENDING_APPROVAL, APPROVED, REJECTED
+    val betProLink: String = "",
     val betProUsername: String = "",
     val betProPassword: String = "",
     val registrationTimestamp: Long = System.currentTimeMillis()

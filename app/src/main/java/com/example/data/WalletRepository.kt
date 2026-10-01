@@ -30,13 +30,13 @@ class WalletRepository(
         return userDao.insertUser(user)
     }
 
-    suspend fun updateUserApproval(userRowId: Long, status: String, bpUsername: String, bpPassword: String, userId: String) {
-        userDao.updateApproval(userRowId, status, bpUsername, bpPassword)
+    suspend fun updateUserApproval(userRowId: Long, status: String, bpLink: String, bpUsername: String, bpPassword: String, userId: String) {
+        userDao.updateApproval(userRowId, status, bpLink, bpUsername, bpPassword)
         notificationDao.insertNotification(
             NotificationEntity(
                 userId = userId,
                 title = "BetPro Account Approved!",
-                message = "Your BetPro account has been approved by admin. Username: $bpUsername",
+                message = "Your BetPro account has been approved by admin. Link: $bpLink, Username: $bpUsername",
                 type = "ACCOUNT_APPROVED"
             )
         )

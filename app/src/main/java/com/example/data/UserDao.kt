@@ -20,6 +20,6 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: UserEntity): Long
 
-    @Query("UPDATE users SET status = :status, betProUsername = :bpUsername, betProPassword = :bpPassword WHERE id = :userRowId")
-    suspend fun updateApproval(userRowId: Long, status: String, bpUsername: String, bpPassword: String)
+    @Query("UPDATE users SET status = :status, betProLink = :bpLink, betProUsername = :bpUsername, betProPassword = :bpPassword WHERE id = :userRowId")
+    suspend fun updateApproval(userRowId: Long, status: String, bpLink: String, bpUsername: String, bpPassword: String)
 }

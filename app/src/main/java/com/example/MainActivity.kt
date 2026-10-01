@@ -610,94 +610,179 @@ fun AutoBetWalletScreen(
         }
 
         item {
-          Box(modifier = Modifier.fillMaxWidth()) {
-            Card(
+          val currentUser by viewModel.currentUser.collectAsState()
+          val bpLink = currentUser?.betProLink ?: ""
+          val bpUser = currentUser?.betProUsername ?: ""
+          val bpPass = currentUser?.betProPassword ?: ""
+          var showPassword by remember { mutableStateOf(false) }
+          val clipboard = LocalClipboardManager.current
+          val context = LocalContext.current
+
+          Card(
+            modifier = Modifier
+              .fillMaxWidth()
+              .border(1.5.dp, goldBorder, RoundedCornerShape(16.dp)),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = cardDarkBg)
+          ) {
+            Column(
               modifier = Modifier
                 .fillMaxWidth()
-                .border(1.5.dp, goldBorder, RoundedCornerShape(16.dp)),
-              shape = RoundedCornerShape(16.dp),
-              colors = CardDefaults.cardColors(containerColor = cardDarkBg)
+                .padding(16.dp),
+              verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-              Box(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .background(
-                    Brush.verticalGradient(
-                      colors = listOf(
-                        Color(0xFF10B981),
-                        Color(0xFF059669),
-                        Color(0xFF047857)
-                      )
-                    )
-                  )
-                  .padding(16.dp)
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
               ) {
-                Column(
-                  modifier = Modifier.fillMaxWidth(),
-                  verticalArrangement = Arrangement.spacedBy(14.dp)
+                Box(
+                  modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(cyanColor),
+                  contentAlignment = Alignment.Center
                 ) {
-                  Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                  ) {
-                    Box(
-                      modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(cyanColor),
-                      contentAlignment = Alignment.Center
-                    ) {
-                      Text(
-                        text = "b",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
-                      )
-                    }
-                    Column {
-                      Text(
-                        text = "AutoBet Pro",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                      )
-                      Text(
-                        text = "Platform Login",
-                        color = Color.White.copy(alpha = 0.8f),
-                        fontSize = 12.sp
-                      )
-                    }
-                  }
-
-                  AccountFieldBox(
-                    label = "USERNAME",
-                    value = "DemoUser"
+                  Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "BetPro Account",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
                   )
-
-                  AccountFieldBox(
-                    label = "PASSWORD",
-                    value = "********"
+                }
+                Column {
+                  Text(
+                    text = "BetPro Account",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                  )
+                  Text(
+                    text = "Your Assigned Trading Credentials",
+                    color = Color.Gray,
+                    fontSize = 12.sp
                   )
                 }
               }
-            }
 
-            Box(
-              modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .offset(x = 12.dp)
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF10B981))
-                .border(2.dp, Color.White, CircleShape),
-              contentAlignment = Alignment.Center
-            ) {
-              Icon(
-                imageVector = Icons.Default.Chat,
-                contentDescription = "Chat",
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-              )
+              if (bpUser.isEmpty()) {
+                Text(
+                  text = "BetPro Account Not Assigned",
+                  color = Color(0xFFF59E0B),
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 15.sp,
+                  modifier = Modifier.padding(vertical = 8.dp)
+                )
+              } else {
+                // BetPro Link & Open BetPro
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                  Text(text = "BetPro Link:", color = Color.Gray, fontSize = 12.sp)
+                  Row(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .clip(RoundedCornerShape(8.dp))
+                      .background(Color.Black.copy(alpha = 0.4f))
+                      .padding(horizontal = 12.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Text(
+                      text = bpLink.ifEmpty { "https://betproexch.com" },
+                      color = Color(0xFF34D399),
+                      fontWeight = FontWeight.Bold,
+                      fontSize = 14.sp,
+                      modifier = Modifier.weight(1f)
+                    )
+                    Button(
+                      onClick = {
+                        val url = bpLink.ifEmpty { "https://betproexch.com" }
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                        context.startActivity(intent)
+                      },
+                      colors = ButtonDefaults.buttonColors(containerColor = goldBorder),
+                      shape = RoundedCornerShape(6.dp),
+                      contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                    ) {
+                      Text("Open BetPro", fontSize = 12.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
+                  }
+                }
+
+                // Username & Copy
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                  Text(text = "BetPro Username:", color = Color.Gray, fontSize = 12.sp)
+                  Row(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .clip(RoundedCornerShape(8.dp))
+                      .background(Color.Black.copy(alpha = 0.4f))
+                      .padding(horizontal = 12.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Text(
+                      text = bpUser,
+                      color = Color.White,
+                      fontWeight = FontWeight.Bold,
+                      fontSize = 15.sp
+                    )
+                    OutlinedButton(
+                      onClick = {
+                        clipboard.setText(AnnotatedString(bpUser))
+                        Toast.makeText(context, "Username copied!", Toast.LENGTH_SHORT).show()
+                      },
+                      shape = RoundedCornerShape(6.dp),
+                      contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                      Text("Copy Username", fontSize = 12.sp, color = goldBorder)
+                    }
+                  }
+                }
+
+                // Password & Copy / Show Hide
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                  Text(text = "BetPro Password:", color = Color.Gray, fontSize = 12.sp)
+                  Row(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .clip(RoundedCornerShape(8.dp))
+                      .background(Color.Black.copy(alpha = 0.4f))
+                      .padding(horizontal = 12.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Text(
+                      text = if (showPassword) bpPass else "••••••••",
+                      color = Color.White,
+                      fontWeight = FontWeight.Bold,
+                      fontSize = 15.sp,
+                      modifier = Modifier.weight(1f)
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                      IconButton(
+                        onClick = { showPassword = !showPassword },
+                        modifier = Modifier.size(28.dp)
+                      ) {
+                        Icon(
+                          imageVector = if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                          contentDescription = "Toggle",
+                          tint = Color.Gray,
+                          modifier = Modifier.size(16.dp)
+                        )
+                      }
+                      OutlinedButton(
+                        onClick = {
+                          clipboard.setText(AnnotatedString(bpPass))
+                          Toast.makeText(context, "Password copied!", Toast.LENGTH_SHORT).show()
+                        },
+                        shape = RoundedCornerShape(6.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                      ) {
+                        Text("Copy Password", fontSize = 12.sp, color = goldBorder)
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -767,179 +852,6 @@ fun AutoBetWalletScreen(
                   gradient = goldGradient,
                   modifier = Modifier.weight(1f)
                 )
-              }
-            }
-          }
-        }
-
-        item {
-          Card(
-            modifier = Modifier
-              .fillMaxWidth()
-              .border(1.dp, goldBorder.copy(alpha = 0.7f), RoundedCornerShape(12.dp)),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = cardDarkBg)
-          ) {
-            Row(
-              modifier = Modifier.fillMaxWidth(),
-              verticalAlignment = Alignment.CenterVertically
-            ) {
-              Box(
-                modifier = Modifier
-                  .width(72.dp)
-                  .background(Color.Black.copy(alpha = 0.4f))
-                  .padding(vertical = 14.dp, horizontal = 12.dp),
-                contentAlignment = Alignment.Center
-              ) {
-                Column(
-                  horizontalAlignment = Alignment.CenterHorizontally,
-                  verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                  Box(
-                    modifier = Modifier
-                      .size(10.dp)
-                      .clip(CircleShape)
-                      .background(Color(0xFFEF4444))
-                  )
-                  Text(
-                    text = "OUT",
-                    color = Color(0xFFF3E5AB),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
-                  )
-                }
-              }
-
-              Spacer(
-                modifier = Modifier
-                  .width(1.dp)
-                  .height(48.dp)
-                  .background(goldBorder.copy(alpha = 0.3f))
-              )
-
-              Row(
-                modifier = Modifier
-                  .weight(1f)
-                  .padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-              ) {
-                Text(
-                  text = "aeem Kazmi",
-                  color = Color.White,
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 14.sp
-                )
-                Box(
-                  modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.1f))
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                  Text(
-                    text = "Gujrat",
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 11.sp
-                  )
-                }
-                Text(
-                  text = "withdrew Rs 55",
-                  color = Color.White.copy(alpha = 0.9f),
-                  fontSize = 12.sp
-                )
-              }
-            }
-          }
-        }
-
-        item {
-          Card(
-            modifier = Modifier
-              .fillMaxWidth()
-              .border(1.dp, Color(0xFF10B981).copy(alpha = 0.7f), RoundedCornerShape(12.dp)),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = cardDarkBg)
-          ) {
-            Row(
-              modifier = Modifier.fillMaxWidth(),
-              verticalAlignment = Alignment.CenterVertically
-            ) {
-              Box(
-                modifier = Modifier
-                  .width(72.dp)
-                  .background(Color.Black.copy(alpha = 0.4f))
-                  .padding(vertical = 14.dp, horizontal = 12.dp),
-                contentAlignment = Alignment.Center
-              ) {
-                Column(
-                  horizontalAlignment = Alignment.CenterHorizontally,
-                  verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                  Box(
-                    modifier = Modifier
-                      .size(10.dp)
-                      .clip(CircleShape)
-                      .background(Color(0xFF10B981))
-                  )
-                  Text(
-                    text = "IN",
-                    color = Color(0xFF10B981),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
-                  )
-                }
-              }
-
-              Spacer(
-                modifier = Modifier
-                  .width(1.dp)
-                  .height(48.dp)
-                  .background(goldBorder.copy(alpha = 0.3f))
-              )
-
-              Row(
-                modifier = Modifier
-                  .weight(1f)
-                  .padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-              ) {
-                Text(
-                  text = "50,000",
-                  color = Color(0xFF10B981),
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 14.sp
-                )
-                Text(
-                  text = "45s ago",
-                  color = Color.Gray,
-                  fontSize = 12.sp
-                )
-                Box(
-                  modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF10B981).copy(alpha = 0.2f))
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
-                  contentAlignment = Alignment.Center
-                ) {
-                  Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                  ) {
-                    Icon(
-                      imageVector = Icons.Default.ArrowDownward,
-                      contentDescription = "In",
-                      tint = Color(0xFF10B981),
-                      modifier = Modifier.size(14.dp)
-                    )
-                    Text(
-                      text = "Daailadr",
-                      color = Color.White,
-                      fontSize = 12.sp,
-                      fontWeight = FontWeight.Bold
-                    )
-                  }
-                }
               }
             }
           }
@@ -1357,7 +1269,7 @@ fun AdminScreen(
                           Toast.makeText(context, "Please enter both BetPro Username and Password", Toast.LENGTH_SHORT).show()
                           return@Button
                         }
-                        viewModel.approveUser(user.id, bpUserText, bpPassText, user.userId)
+                        viewModel.approveUser(user.id, "https://betproexch.com", bpUserText, bpPassText, user.userId)
                         Toast.makeText(context, "Credentials saved & user approved!", Toast.LENGTH_SHORT).show()
                       },
                       modifier = Modifier.fillMaxWidth(),
